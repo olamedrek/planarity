@@ -54,12 +54,11 @@ vector<vector<int>> PlanarityTester::get_contact_vertices(vector<vector<int>> &f
             tie(u, v) = G.get_edge_ends(edge);
             if(common[u]) {
                 contact_vertices[i].push_back(u);
-                common[u] = false;
             }
             if(common[v]) {
                 contact_vertices[i].push_back(v);
-                common[v] = false;
             }
+            common[u] = common[v] = false;
         }
     }
     return contact_vertices;
@@ -81,8 +80,8 @@ vector<vector<int>> PlanarityTester::get_admissible_faces(vector<vector<int>> &f
             for(int face : embedding.vertex_faces[v]) {
                 if(common[face] == contact_vertices[i].size()) {
                     admissible_faces[i].push_back(face);
-                    common[face] = 0;
                 }
+                common[face] = 0;
             }
         }
     }
@@ -131,7 +130,7 @@ int PlanarityTester::one_iteration() {
     vector<vector<int>> contact_vertices = get_contact_vertices(fragments);
     vector<vector<int>> admissible_faces = get_admissible_faces(fragments, contact_vertices);
 
-    for(int i = 0; i < admissible_faces.size(); i++) {
+    for(int i = 0; i < fragments.size(); i++) {
         if(admissible_faces[i].size() == 0) {
             return 0;
         }
@@ -169,6 +168,10 @@ int PlanarityTester::one_iteration() {
 }
 
 tuple<bool,Embedding> PlanarityTester::test() {
+    if(G.edges.size() <= 1) {
+        return make_tuple(true, Embedding());
+    }
+
     vector<int> cycle = G.get_cycle();
     embedding.embed_initial_cycle(cycle);
 

@@ -38,15 +38,65 @@ vector<int> Graph::get_neighbours(int v) const {
 vector<int> Graph::get_cycle() const {
     vector<int> cycle;
     vector<int> color(n, 0);
-    find_cycle_dfs(0, -1, color, cycle);
-    return cycle;
+
+    for(int i = 0; i < n; i++) {
+        if(color[i] == 0) {
+            if(find_cycle_dfs(i, -1, color, cycle))
+                return cycle;
+        }
+        cycle.clear();
+    }
 }
 
 tuple<int,int> Graph::get_edge_ends(int edge_id) const {
     return edges[edge_id];
 }
 
-bool Graph::two_connected() const {}
+void Graph::biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent, vector<bool> &visited, int count, vector<int> &d, vector<int> &low, vector<Graph> &comps) const {
+    visited[u] = true;
+    count++;
+    d[u] = count;
+    low[u] = d[u];
+
+    for(int edge : adj_list[u]) {
+        int v = get_neighbour(u, edge);
+        if(!visited[v]) {
+            S.push(edge);
+            parent[v] = u;
+            biconnected_components_dfs(S, v, parent, visited, count, d, low, comps);
+            if(low[v] >= d[u]) {
+                Graph comp(n);
+                while(S.size() > 0) {
+                    int e = S.top();
+                    S.pop();
+                    comp.add_edge(edges[e].first, edges[e].second);
+                    if(e == edge) break;
+                }
+                comps.push_back(comp);
+            }
+            low[u] = min(low[u], low[v]);
+        } else if(parent[u] != v && d[v] < d[u]){
+            S.push(edge);
+            low[u] = min(low[u], d[v]);
+        }
+    }
+}
+
+vector<Graph> Graph::get_biconnected_components() const {
+    int count = 0;
+    stack<int> S;
+    vector<bool> visited(n);
+    vector<int> parent(n, -1), d(n), low(n);
+    vector<Graph> comps;
+
+    for(int i = 0; i < n; i++) {
+        if(!visited[i]) {
+            biconnected_components_dfs(S, i, parent, visited, count, d, low, comps);
+        }
+    }
+    return comps;
+}
+
 
 bool Graph::find_cycle_dfs(int v, int parent, vector<int> &color, vector<int> &cycle) const {
     color[v] = 1;
@@ -72,6 +122,5 @@ bool Graph::find_cycle_dfs(int v, int parent, vector<int> &color, vector<int> &c
     return false;
 }
 
-bool Graph::two_connected_dfs(int v, int parent, vector<bool> &visited, vector<int> &rank, vector<int> &depth) const {}
 
 

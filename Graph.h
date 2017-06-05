@@ -29,12 +29,12 @@ public:
 
     tuple<int,int> get_edge_ends(int edge_id) const;
 
-    bool two_connected() const;
+    vector<Graph> get_biconnected_components() const;
 
 private:
     bool find_cycle_dfs(int v, int parent, vector<int> &color, vector<int> &cycle) const;
 
-    bool two_connected_dfs(int v, int parent, vector<bool> &visited, vector<int> &rank, vector<int> &depth) const;
+    void biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent, vector<bool> &visited, int count, vector<int> &d, vector<int> &low, vector<Graph> &comps) const;
 };
 
 

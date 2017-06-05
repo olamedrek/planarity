@@ -12,7 +12,7 @@ Embedding::Embedding(Graph G) : G(G) {
 void Embedding::embed_initial_cycle(vector<int> &cycle) {
     faces.resize(2);
 
-    for(int i = 0; i < cycle.size()-1; i++) {
+    for(int i = 0; i < (int)cycle.size()-1; i++) {
         int u = cycle[i], v = cycle[i+1];
         embedded[u][v] = embedded[v][u] = 1;
         faces[0].push_back(u);

@@ -6,7 +6,18 @@
 
 using namespace std;
 
-tuple<bool,vector<pair<int,int>>> get_coordinates(const Graph &G) {
+bool test_planarity_of_not_biconnected_graph(vector<Graph> &comps) {
+    for(Graph &comp : comps) {
+        PlanarityTester tester(comp);
+        bool result;
+        Embedding embedding;
+        tie(result, embedding) = tester.test();
+        if(!result) return false;
+    }
+    return true;
+}
+
+tuple<bool,vector<pair<int,int>>> get_coordinates(Graph &G) {
     PlanarityTester tester(G);
     bool result;
     Embedding embedding;
@@ -17,7 +28,6 @@ tuple<bool,vector<pair<int,int>>> get_coordinates(const Graph &G) {
     } else {
         return make_tuple(result, vector<pair<int,int>>());
     }
-
 }
 
 int main(int argc, char **argv) {
@@ -41,27 +51,29 @@ int main(int argc, char **argv) {
         G.add_edge(a, b);
     }
 
-   /* if(!G.two_connected()) {
-        cout << "UNKNOWN\n";
-        return 0;
-    }*/
+    vector<Graph> comps = G.get_biconnected_components();
 
-    bool result;
-    vector<pair<int,int>> coordinates;
+    if(comps.size() == 1) {
+        cout << 1 << endl;
 
-    tie(result, coordinates) = get_coordinates(G);
+        bool planar;
+        vector<pair<int,int>> coordinates;
+        tie(planar, coordinates) = get_coordinates(G);
 
-    if(!result) {
-        cout << result << endl;
-    } else {
-        if(!check_drawing(G, coordinates)) {
-            cout << "ERROR\n";
-        } else {
-            cout << result << endl;
+        cout << planar << endl;
+
+        if(planar) {
+            if(!check_drawing(G, coordinates)) {
+                cerr << "drawing not correct" << endl;
+            }
             for(int i = 0; i < n; i++) {
                 cout << coordinates[i].first << " " << coordinates[i].second << endl;
             }
         }
+    } else {
+        cout << 0 << endl;
+        bool planar = test_planarity_of_not_biconnected_graph(comps);
+        cout << planar << endl;
     }
 
     return 0;
