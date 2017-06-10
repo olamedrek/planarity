@@ -7,6 +7,7 @@ Embedding::Embedding() {}
 Embedding::Embedding(Graph G) : G(G) {
     embedded.resize(G.n, vector<bool>(G.n));
     vertex_faces.resize(G.n);
+    face_belonging.resize(G.n, vector<bool>(4 * G.n)); // TODO faces upperbound
 }
 
 void Embedding::embed_initial_cycle(vector<int> &cycle) {
@@ -17,6 +18,8 @@ void Embedding::embed_initial_cycle(vector<int> &cycle) {
         embedded[u][v] = embedded[v][u] = 1;
         faces[0].push_back(u);
         faces[1].push_back(u);
+        face_belonging[u][0] = true;
+        face_belonging[u][1] = true;
         vertex_faces[u].push_back(0);
         vertex_faces[u].push_back(1);
     }
@@ -71,13 +74,17 @@ void Embedding::embed_path(vector<int> path, int face_id) {
                 break;
             }
         }
+        face_belonging[v][face_id] = false;
+        face_belonging[v][new_face_id] = true;
         vertex_faces[v].push_back(new_face_id);
     }
 
     for(int v : path) {
         vertex_faces[v].push_back(new_face_id);
+        face_belonging[v][new_face_id] = true;
         if(v != a && v != b) {
             vertex_faces[v].push_back(face_id);
+            face_belonging[v][face_id] = true;
         }
     }
 }
@@ -115,4 +122,8 @@ void Embedding::triangulate() {
             face_id++;
         }
     }
+}
+
+bool Embedding::belongs(int v, int face_id) {
+    return face_belonging[v][face_id];
 }

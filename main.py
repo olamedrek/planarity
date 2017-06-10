@@ -21,11 +21,20 @@ subprocess.call([os.getcwd() + '/' + executable, input_path, output_path])
 points = []
 edges = []
 
+if os.path.isfile(expected_path):
+    with open(expected_path) as expected:
+        expected_result = int(next(expected)) == 1
+
 with open(output_path) as output:
     biconnected = int(next(output)) == 1
     planar = int(next(output)) == 1
     print "biconnected", biconnected
     print "planar", planar
+    if expected_result != planar:
+        print 'WA'
+        sys.exit()
+    else:
+        print 'OK'
     if biconnected and planar:
         for line in output:
             x, y = [int(i) for i in line.split()]
@@ -38,15 +47,6 @@ with open(input_path) as input:
     for line in input:
         u, v = [int(i)-1 for i in line.split()]
         edges.append([u, v])
-
-if os.path.isfile(expected_path):
-    with open(expected_path) as expected:
-        expected_result = int(next(expected)) == 1
-        if expected_result != planar:
-            print 'WA'
-            sys.exit()
-        else:
-            print 'OK'
 
 points = numpy.array(points)
 edges = numpy.array(edges)

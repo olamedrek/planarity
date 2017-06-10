@@ -14,7 +14,7 @@ public:
 
     PlanarityTester(const Graph &G);
 
-    tuple<bool,Embedding> test();
+    tuple<bool,Embedding> test(); // TODO tuple -> pair
 
 private:
     void fragments_dfs(int e, int v, vector<bool> &visited, vector<vector<int>> &fragments);

@@ -25,7 +25,7 @@ vector<vector<int>> PlanarityTester::get_fragments() {
     vector<vector<int>> fragments;
     vector<bool> visited(m);
 
-    for(int i = 0; i < m; i++) {
+    for(int i = 0; i < m; i++) { // TODO dfs only from edges with contact vertex
         if(!visited[i] && !embedding.is_edge_embedded(i)) {
             fragments.push_back(vector<int>());
             fragments_dfs(i, G.edges[i].first, visited, fragments);
@@ -39,26 +39,26 @@ vector<vector<int>> PlanarityTester::get_fragments() {
 
 vector<vector<int>> PlanarityTester::get_contact_vertices(vector<vector<int>> &fragments) {
     vector<vector<int>> contact_vertices(fragments.size());
-    vector<bool> common(n, 0);
+    vector<bool> seen(n, 0);
 
     for(int i = 0; i < fragments.size(); i++) {
         for(int edge : fragments[i]) {
             int u, v;
             tie(u, v) = G.get_edge_ends(edge);
-            if(embedding.is_vertex_embedded(u)) common[u] = true;
-            if(embedding.is_vertex_embedded(v)) common[v] = true;
+            if(embedding.is_vertex_embedded(u)) seen[u] = true;
+            if(embedding.is_vertex_embedded(v)) seen[v] = true;
         }
 
         for(int edge : fragments[i]) {
-            int u, v;
+            int u, v; // TODO eliminate duplication
             tie(u, v) = G.get_edge_ends(edge);
-            if(common[u]) {
+            if(seen[u]) {
                 contact_vertices[i].push_back(u);
             }
-            if(common[v]) {
+            if(seen[v]) {
                 contact_vertices[i].push_back(v);
             }
-            common[u] = common[v] = false;
+            seen[u] = seen[v] = false;
         }
     }
     return contact_vertices;
@@ -69,21 +69,31 @@ vector<vector<int>> PlanarityTester::get_admissible_faces(vector<vector<int>> &f
     vector<vector<int>> admissible_faces(fragments.size());
     vector<int> common(embedding.faces.size(), 0);
 
+    // TODO zapisywac przeciecia
+
     for(int i = 0; i < fragments.size(); i++) {
-        for(int v : contact_vertices[i]) {
-            for(int face : embedding.vertex_faces[v]) {
-                common[face]++;
+        int min_faces_num = 1000000;
+        int min_vertex = -1;
+
+        for(int cv : contact_vertices[i]) {
+            if(embedding.vertex_faces[cv].size() < min_faces_num) {
+                min_faces_num = embedding.vertex_faces[cv].size();
+                min_vertex = cv;
             }
         }
 
-        for(int v : contact_vertices[i]) {
-            for(int face : embedding.vertex_faces[v]) {
-                if(common[face] == contact_vertices[i].size()) {
-                    admissible_faces[i].push_back(face);
-                }
-                common[face] = 0;
+        vector<int> candidate_faces = embedding.vertex_faces[min_vertex];
+        vector<int> final;
+
+        for(int face_id : candidate_faces) {
+            bool ok = true;
+            for(int cv : contact_vertices[i]) {
+                if(!embedding.belongs(cv, face_id)) ok = false;
             }
+            if(ok) final.push_back(face_id);
         }
+
+        admissible_faces[i] = final;
     }
     return admissible_faces;
 }
@@ -171,6 +181,8 @@ tuple<bool,Embedding> PlanarityTester::test() {
     if(G.edges.size() <= 1) {
         return make_tuple(true, Embedding());
     }
+
+    // if edges > 3n - 6 return false
 
     vector<int> cycle = G.get_cycle();
     embedding.embed_initial_cycle(cycle);

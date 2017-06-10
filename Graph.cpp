@@ -52,7 +52,8 @@ tuple<int,int> Graph::get_edge_ends(int edge_id) const {
     return edges[edge_id];
 }
 
-void Graph::biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent, vector<bool> &visited, int count, vector<int> &d, vector<int> &low, vector<Graph> &comps) const {
+void Graph::biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent, vector<bool> &visited, int count,
+                                       vector<int> &d, vector<int> &low, vector<Graph> &comps) const {
     visited[u] = true;
     count++;
     d[u] = count;
@@ -65,7 +66,7 @@ void Graph::biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent
             parent[v] = u;
             biconnected_components_dfs(S, v, parent, visited, count, d, low, comps);
             if(low[v] >= d[u]) {
-                Graph comp(n);
+                Graph comp(n); // TODO : compress
                 while(S.size() > 0) {
                     int e = S.top();
                     S.pop();

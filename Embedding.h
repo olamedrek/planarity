@@ -11,6 +11,7 @@ public:
     vector<vector<int>> faces;
     vector<vector<bool>> embedded;
     vector<vector<int>> vertex_faces;
+    vector<vector<bool>> face_belonging;
 
     vector<int> get_face_fragment(int face_id, int a, int b);
 
@@ -28,6 +29,8 @@ public:
     bool is_edge_embedded(int e);
 
     void triangulate();
+
+    bool belongs(int v, int face_id);
 };
 
 
