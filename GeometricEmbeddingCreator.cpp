@@ -3,7 +3,7 @@
 
 GeometricEmbeddingCreator::GeometricEmbeddingCreator(Embedding embedding) : embedding(embedding) {}
 
-pair<int,int> intersection(pair<int,int> a, pair<int,int> b) {
+pair<int,int> intersection(pair<int,int> &a, pair<int,int> &b) {
     return {(a.first - a.second + b.first + b.second) / 2, (-a.first + a.second + b.first + b.second) / 2};
 };
 
@@ -98,16 +98,9 @@ vector<pair<int,int>> GeometricEmbeddingCreator::get_coordinates() {
                 break;
             }
         }
-
-        for(int j = q; j < contour.size(); j++) {
+        for(int j = p+1; j < contour.size(); j++) {
             for(int u : L[contour[j]]) {
-                coordinates[u].first += 2;
-            }
-        }
-
-        for(int j = p+1; j < q; j++) {
-            for(int u : L[contour[j]]) {
-                coordinates[u].first += 1;
+                coordinates[u].first += j < q ? 1 : 2;
             }
         }
 

@@ -19,6 +19,10 @@ void Graph::add_edge(int u, int v) {
     matrix[u][v] = matrix[v][u] = true;
 }
 
+void Graph::add_edge(pair<int,int> p) {
+    add_edge(p.first, p.second);
+}
+
 int Graph::num_of_edges() const {
     return edges.size();
 }
@@ -41,18 +45,20 @@ vector<int> Graph::get_cycle() const {
 
     for(int i = 0; i < n; i++) {
         if(color[i] == 0) {
-            if(find_cycle_dfs(i, -1, color, cycle))
+            if(find_cycle_dfs(i, -1, color, cycle)) {
                 return cycle;
+            }
         }
         cycle.clear();
     }
 }
 
-tuple<int,int> Graph::get_edge_ends(int edge_id) const {
-    return edges[edge_id];
+vector<int> Graph::get_edge_ends(int edge_id) const {
+    int u = edges[edge_id].first, v = edges[edge_id].second;
+    return vector<int>({u, v});
 }
 
-void Graph::biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent, vector<bool> &visited, int count,
+void Graph::biconnected_components_dfs(int u, vector<int> &parent, vector<bool> &visited, stack<int> &S, int count,
                                        vector<int> &d, vector<int> &low, vector<Graph> &comps) const {
     visited[u] = true;
     count++;
@@ -64,7 +70,7 @@ void Graph::biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent
         if(!visited[v]) {
             S.push(edge);
             parent[v] = u;
-            biconnected_components_dfs(S, v, parent, visited, count, d, low, comps);
+            biconnected_components_dfs(v, parent, visited, S, count, d, low, comps);
             if(low[v] >= d[u]) {
                 Graph comp(n); // TODO : compress
                 while(S.size() > 0) {
@@ -88,16 +94,15 @@ vector<Graph> Graph::get_biconnected_components() const {
     stack<int> S;
     vector<bool> visited(n);
     vector<int> parent(n, -1), d(n), low(n);
-    vector<Graph> comps;
+    vector<Graph> components;
 
     for(int i = 0; i < n; i++) {
         if(!visited[i]) {
-            biconnected_components_dfs(S, i, parent, visited, count, d, low, comps);
+            biconnected_components_dfs(i, parent, visited, S, count, d, low, components);
         }
     }
-    return comps;
+    return components;
 }
-
 
 bool Graph::find_cycle_dfs(int v, int parent, vector<int> &color, vector<int> &cycle) const {
     color[v] = 1;

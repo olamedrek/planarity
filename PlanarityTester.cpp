@@ -25,13 +25,12 @@ vector<vector<int>> PlanarityTester::get_fragments() {
     vector<vector<int>> fragments;
     vector<bool> visited(m);
 
-    for(int i = 0; i < m; i++) { // TODO dfs only from edges with contact vertex
-        if(!visited[i] && !embedding.is_edge_embedded(i)) {
+    for(int i = 0; i < m; i++) {
+        int u = G.edges[i].first, v = G.edges[i].second;
+        if(!visited[i] && !embedding.is_edge_embedded(i) && (embedding.is_vertex_embedded(u) || embedding.is_vertex_embedded(v))) {
             fragments.push_back(vector<int>());
-            fragments_dfs(i, G.edges[i].first, visited, fragments);
-            swap(fragments.back()[0], fragments.back().back());
-            fragments.back().pop_back();
-            fragments_dfs(i, G.edges[i].second, visited, fragments);
+            if(embedding.is_vertex_embedded(v)) swap(u, v);
+            fragments_dfs(i, u, visited, fragments);
         }
     }
     return fragments;
@@ -42,23 +41,15 @@ vector<vector<int>> PlanarityTester::get_contact_vertices(vector<vector<int>> &f
     vector<bool> seen(n, 0);
 
     for(int i = 0; i < fragments.size(); i++) {
-        for(int edge : fragments[i]) {
-            int u, v;
-            tie(u, v) = G.get_edge_ends(edge);
-            if(embedding.is_vertex_embedded(u)) seen[u] = true;
+        for(int edge : fragments[i]) for(int v : G.get_edge_ends(edge)) {
             if(embedding.is_vertex_embedded(v)) seen[v] = true;
         }
 
-        for(int edge : fragments[i]) {
-            int u, v; // TODO eliminate duplication
-            tie(u, v) = G.get_edge_ends(edge);
-            if(seen[u]) {
-                contact_vertices[i].push_back(u);
-            }
+        for(int edge : fragments[i]) for(int v : G.get_edge_ends(edge)) {
             if(seen[v]) {
                 contact_vertices[i].push_back(v);
             }
-            seen[u] = seen[v] = false;
+            seen[v] = false;
         }
     }
     return contact_vertices;
@@ -157,11 +148,8 @@ int PlanarityTester::one_iteration() {
     if(chosen == -1) chosen = 0;
 
     Graph fragment(n);
-
-    for(int e : fragments[chosen]) {
-        int u, v;
-        tie(u, v) = G.get_edge_ends(e);
-        fragment.add_edge(u, v);
+    for(int edge_id : fragments[chosen]) {
+        fragment.add_edge(G.edges[edge_id]);
     }
 
     vector<bool> contact(n);

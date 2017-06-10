@@ -19,6 +19,8 @@ public:
 
     void add_edge(int u, int v);
 
+    void add_edge(pair<int,int> p);
+
     int num_of_edges() const;
 
     int get_neighbour(int v, int edge_id) const;
@@ -27,15 +29,15 @@ public:
 
     vector<int> get_cycle() const;
 
-    tuple<int,int> get_edge_ends(int edge_id) const;
+    vector<int> get_edge_ends(int edge_id) const;
 
     vector<Graph> get_biconnected_components() const;
 
 private:
     bool find_cycle_dfs(int v, int parent, vector<int> &color, vector<int> &cycle) const;
 
-    void biconnected_components_dfs(stack<int> &S, int u, vector<int> &parent, vector<bool> &visited, int count, vector<int> &d, vector<int> &low, vector<Graph> &comps) const;
+    void biconnected_components_dfs(int u, vector<int> &parent, vector<bool> &visited, stack<int> &S, int count,
+                                    vector<int> &d, vector<int> &low, vector<Graph> &components) const;
 };
-
 
 #endif //PLANARITY_GRAPH_H

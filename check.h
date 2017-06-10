@@ -54,9 +54,8 @@ bool check_drawing(const Graph &G, vector<pair<int,int>> &coordinates) {
     }
     for(int i = 0; i < G.num_of_edges(); i++) {
         for(int j = i+1; j < G.num_of_edges(); j++) {
-            int u1, v1, u2, v2;
-            tie(u1, v1) = G.get_edge_ends(i);
-            tie(u2, v2) = G.get_edge_ends(j);
+            int u1 = G.edges[i].first, v1 = G.edges[i].second;
+            int u2 = G.edges[j].first, v2 = G.edges[j].second;
 
             if(u1 == u2 || u1 == v2 || v1 == u2 || v1 == v2) continue;
 
