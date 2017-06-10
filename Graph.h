@@ -36,8 +36,11 @@ public:
 private:
     bool find_cycle_dfs(int v, int parent, vector<int> &color, vector<int> &cycle) const;
 
-    void biconnected_components_dfs(int u, vector<int> &parent, vector<bool> &visited, stack<int> &S, int count,
-                                    vector<int> &d, vector<int> &low, vector<Graph> &components) const;
+    void biconnected_components_dfs(int u, vector<int> &parent, vector<bool> &visited, stack<int> &edges_stack,
+                                    int count, vector<int> &depth, vector<int> &low, vector<Graph> &components,
+                                    vector<int> &compress) const;
+
+    Graph get_compressed_graph(vector<int> &component_edges, vector<int> &compress) const;
 };
 
 #endif //PLANARITY_GRAPH_H

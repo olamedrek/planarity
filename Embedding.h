@@ -13,9 +13,6 @@ public:
     vector<vector<int>> vertex_faces;
     vector<vector<bool>> face_belonging;
 
-    vector<int> get_face_fragment(int face_id, int a, int b);
-
-public:
     Embedding();
 
     Embedding(Graph G);
@@ -31,6 +28,9 @@ public:
     void triangulate();
 
     bool belongs(int v, int face_id);
+
+private:
+    vector<int> get_face_fragment(int face_id, int a, int b);
 };
 
 

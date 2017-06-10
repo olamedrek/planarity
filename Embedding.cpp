@@ -15,35 +15,13 @@ void Embedding::embed_initial_cycle(vector<int> &cycle) {
 
     for(int i = 0; i < (int)cycle.size()-1; i++) {
         int u = cycle[i], v = cycle[i+1];
-        embedded[u][v] = embedded[v][u] = 1;
+        embedded[u][v] = embedded[v][u] = true;
+        face_belonging[u][0] = face_belonging[u][1] = true;
         faces[0].push_back(u);
         faces[1].push_back(u);
-        face_belonging[u][0] = true;
-        face_belonging[u][1] = true;
         vertex_faces[u].push_back(0);
         vertex_faces[u].push_back(1);
     }
-}
-
-vector<int> Embedding::get_face_fragment(int face_id, int a, int b) {
-    vector<int> result;
-    int a_pos, b_pos;
-    int size = faces[face_id].size();
-
-    for(int i = 0; i < size; i++) {
-        if(faces[face_id][i] == a) {
-            a_pos = i;
-        }
-        if(faces[face_id][i] == b) {
-            b_pos = i;
-        }
-    }
-
-    for(int i = (a_pos + 1) % size; i != b_pos; i = (i+1) % size) {
-        result.push_back(faces[face_id][i]);
-    }
-
-    return result;
 }
 
 void Embedding::embed_path(vector<int> path, int face_id) {
@@ -66,7 +44,7 @@ void Embedding::embed_path(vector<int> path, int face_id) {
     copy(a_to_b.begin(), a_to_b.end(), back_inserter(faces[face_id]));
     copy(path.begin(), path.end(), back_inserter(faces[face_id]));
 
-    for(int v : b_to_a) {
+    for(int v : b_to_a) { // TODO check complexity
         for(int i = 0; i < vertex_faces[v].size(); i++) {
             if(vertex_faces[v][i] == face_id) {
                 swap(vertex_faces[v][i], vertex_faces[v].back());
@@ -126,4 +104,24 @@ void Embedding::triangulate() {
 
 bool Embedding::belongs(int v, int face_id) {
     return face_belonging[v][face_id];
+}
+
+vector<int> Embedding::get_face_fragment(int face_id, int a, int b) {
+    vector<int> result;
+    int a_pos, b_pos;
+    int size = faces[face_id].size();
+
+    for(int i = 0; i < size; i++) {
+        if(faces[face_id][i] == a) {
+            a_pos = i;
+        }
+        if(faces[face_id][i] == b) {
+            b_pos = i;
+        }
+    }
+
+    for(int i = (a_pos + 1) % size; i != b_pos; i = (i+1) % size) {
+        result.push_back(faces[face_id][i]);
+    }
+    return result;
 }

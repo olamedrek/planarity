@@ -7,6 +7,69 @@ pair<int,int> intersection(pair<int,int> &a, pair<int,int> &b) {
     return {(a.first - a.second + b.first + b.second) / 2, (-a.first + a.second + b.first + b.second) / 2};
 };
 
+vector<pair<int,int>> GeometricEmbeddingCreator::get_coordinates() {
+    embedding.triangulate();
+    Graph& G = embedding.G;
+
+    vector<int> order = get_canonical_order();
+
+    vector<vector<int>> dependent(G.n);
+    vector<pair<int,int>> coordinates(G.n);
+    vector<int> contour;
+
+    vector<pair<int,int>> init_pos = {{0, 0}, {2, 0}, {1, 1}};
+    for(int i = 0; i < 3; i++) {
+        coordinates[order[i]] = init_pos[i];
+        dependent[order[i]].push_back(order[i]);
+    }
+
+    contour.push_back(order[0]);
+    contour.push_back(order[2]);
+    contour.push_back(order[1]);
+
+    for(int i = 3; i < order.size(); i++) {
+        int v = order[i];
+
+        int p, q;
+        for(int j = 0; j < contour.size(); j++) {
+            if (G.matrix[v][contour[j]]) {
+                p = j;
+                break;
+            }
+        }
+        for(int j = (int)contour.size() - 1; j >= 0; j--) {
+            if (G.matrix[v][contour[j]]) {
+                q = j;
+                break;
+            }
+        }
+        for(int j = p+1; j < contour.size(); j++) {
+            for(int u : dependent[contour[j]]) {
+                coordinates[u].first += j < q ? 1 : 2;
+            }
+        }
+
+        coordinates[v] = intersection(coordinates[contour[p]], coordinates[contour[q]]);
+        dependent[v].push_back(v);
+
+        for(int j = p+1; j < q; j++) {
+            for(int u : dependent[contour[j]]) {
+                dependent[v].push_back(u);
+            }
+        }
+
+        vector<int> tmp;
+        for(int j = 0; j < contour.size(); j++) {
+            if(j <= p) tmp.push_back(contour[j]);
+            if(j == p+1) tmp.push_back(v);
+            if(j >= q) tmp.push_back(contour[j]);
+        }
+        contour = tmp;
+    }
+
+    return coordinates;
+};
+
 vector<int> GeometricEmbeddingCreator::get_canonical_order() {
     Graph& G = embedding.G;
     vector<vector<int>>& faces = embedding.faces;
@@ -60,67 +123,3 @@ vector<int> GeometricEmbeddingCreator::get_canonical_order() {
 
     return order;
 }
-
-
-vector<pair<int,int>> GeometricEmbeddingCreator::get_coordinates() {
-    embedding.triangulate();
-    Graph& G = embedding.G;
-
-    vector<int> order = get_canonical_order();
-
-    vector<vector<int>> L(G.n);
-    vector<pair<int,int>> coordinates(G.n);
-    vector<int> contour;
-
-    vector<pair<int,int>> init_pos = {{0, 0}, {2, 0}, {1, 1}};
-    for(int i = 0; i < 3; i++) {
-        coordinates[order[i]] = init_pos[i];
-        L[order[i]].push_back(order[i]);
-    }
-
-    contour.push_back(order[0]);
-    contour.push_back(order[2]);
-    contour.push_back(order[1]);
-
-    for(int i = 3; i < order.size(); i++) {
-        int v = order[i];
-
-        int p, q;
-        for(int j = 0; j < contour.size(); j++) {
-            if (G.matrix[v][contour[j]]) {
-                p = j;
-                break;
-            }
-        }
-        for(int j = (int)contour.size() - 1; j >= 0; j--) {
-            if (G.matrix[v][contour[j]]) {
-                q = j;
-                break;
-            }
-        }
-        for(int j = p+1; j < contour.size(); j++) {
-            for(int u : L[contour[j]]) {
-                coordinates[u].first += j < q ? 1 : 2;
-            }
-        }
-
-        coordinates[v] = intersection(coordinates[contour[p]], coordinates[contour[q]]);
-        L[v].push_back(v);
-
-        for(int j = p+1; j < q; j++) {
-            for(int u : L[contour[j]]) {
-                L[v].push_back(u);
-            }
-        }
-
-        vector<int> tmp;
-        for(int j = 0; j < contour.size(); j++) {
-            if(j <= p) tmp.push_back(contour[j]);
-            if(j == p+1) tmp.push_back(v);
-            if(j >= q) tmp.push_back(contour[j]);
-        }
-        contour = tmp;
-    }
-
-    return coordinates;
-};

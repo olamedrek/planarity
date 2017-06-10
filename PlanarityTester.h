@@ -14,7 +14,7 @@ public:
 
     PlanarityTester(const Graph &G);
 
-    tuple<bool,Embedding> test(); // TODO tuple -> pair
+    pair<bool,Embedding> test();
 
 private:
     void fragments_dfs(int e, int v, vector<bool> &visited, vector<vector<int>> &fragments);
@@ -28,8 +28,6 @@ private:
     bool alpha_path_dfs(int v, Graph &fragment, vector<bool> &visited, vector<bool> &contact, vector<int> &path);
 
     vector<int> get_alpha_path(Graph &fragment, vector<bool> &contact);
-
-    int one_iteration();
 };
 
 

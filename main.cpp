@@ -6,8 +6,10 @@
 
 using namespace std;
 
-bool test_planarity_of_not_biconnected_graph(vector<Graph> &comps) {
-    for(Graph &comp : comps) {
+// TODO more tests, automatically run all tests, documentation, flags
+
+bool planarity_test_for_non_biconnected(vector<Graph> &components) {
+    for(Graph &comp : components) {
         PlanarityTester tester(comp);
         bool result;
         Embedding embedding;
@@ -17,16 +19,16 @@ bool test_planarity_of_not_biconnected_graph(vector<Graph> &comps) {
     return true;
 }
 
-tuple<bool,vector<pair<int,int>>> get_coordinates(Graph &G) {
+pair<bool,vector<pair<int,int>>> get_coordinates(Graph &G) {
     PlanarityTester tester(G);
     bool result;
     Embedding embedding;
     tie(result, embedding) = tester.test();
     if(result) {
         GeometricEmbeddingCreator creator(embedding);
-        return make_tuple(result, creator.get_coordinates());
+        return {result, creator.get_coordinates()};
     } else {
-        return make_tuple(result, vector<pair<int,int>>());
+        return {result, vector<pair<int,int>>()};
     }
 }
 
@@ -51,9 +53,9 @@ int main(int argc, char **argv) {
         G.add_edge(a, b);
     }
 
-    vector<Graph> comps = G.get_biconnected_components();
+    vector<Graph> components = G.get_biconnected_components();
 
-    if(comps.size() == 1) {
+    if(components.size() == 1) {
         cout << 1 << endl;
 
         bool planar;
@@ -72,7 +74,7 @@ int main(int argc, char **argv) {
         }
     } else {
         cout << 0 << endl;
-        bool planar = test_planarity_of_not_biconnected_graph(comps);
+        bool planar = planarity_test_for_non_biconnected(components);
         cout << planar << endl;
     }
 

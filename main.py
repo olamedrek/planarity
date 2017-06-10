@@ -22,7 +22,6 @@ points = []
 edges = []
 
 
-
 with open(output_path) as output:
     biconnected = int(next(output)) == 1
     planar = int(next(output)) == 1

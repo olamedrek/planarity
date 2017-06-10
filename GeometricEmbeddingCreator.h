@@ -7,15 +7,15 @@
 #include "PlanarityTester.h"
 
 class GeometricEmbeddingCreator {
-private:
+public:
     Embedding embedding;
 
-    vector<int> get_canonical_order();
-
-public:
     GeometricEmbeddingCreator(Embedding embedding);
 
     vector<pair<int,int>> get_coordinates();
+
+private:
+    vector<int> get_canonical_order();
 };
 
 
