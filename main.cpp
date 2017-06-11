@@ -6,13 +6,13 @@
 
 using namespace std;
 
-// TODO more tests, automatically run all tests, documentation, flags
+// TODO more tests, documentation
 
-bool planarity_test_for_non_biconnected(vector<Graph> &components) {
+bool test_non_biconnected(vector<Graph> &components) {
+    bool result;
+    Embedding embedding;
     for(Graph &comp : components) {
         PlanarityTester tester(comp);
-        bool result;
-        Embedding embedding;
         tie(result, embedding) = tester.test();
         if(!result) return false;
     }
@@ -65,16 +65,15 @@ int main(int argc, char **argv) {
         cout << planar << endl;
 
         if(planar) {
-            if(!check_drawing(G, coordinates)) {
-                cerr << "drawing not correct" << endl;
-            }
+            cout << check_drawing(G, coordinates) << endl;
+
             for(int i = 0; i < n; i++) {
                 cout << coordinates[i].first << " " << coordinates[i].second << endl;
             }
         }
     } else {
         cout << 0 << endl;
-        bool planar = planarity_test_for_non_biconnected(components);
+        bool planar = test_non_biconnected(components);
         cout << planar << endl;
     }
 
