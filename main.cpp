@@ -6,8 +6,6 @@
 
 using namespace std;
 
-// TODO more tests, documentation
-
 bool test_non_biconnected(vector<Graph> &components) {
     bool result;
     Embedding embedding;
@@ -55,7 +53,7 @@ int main(int argc, char **argv) {
 
     vector<Graph> components = G.get_biconnected_components();
 
-    if(components.size() == 1) {
+    if(components.size() == 1 && G.num_of_edges() > 1) {
         cout << 1 << endl;
 
         bool planar;

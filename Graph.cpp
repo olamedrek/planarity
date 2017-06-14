@@ -12,10 +12,10 @@ Graph::Graph(int n) : n(n) {
 }
 
 void Graph::add_edge(int u, int v) {
-    int edge_id = edges.size();
+    int e = edges.size();
     edges.push_back({u, v});
-    adj_list[u].push_back(edge_id);
-    adj_list[v].push_back(edge_id);
+    adj_list[u].push_back(e);
+    adj_list[v].push_back(e);
     matrix[u][v] = matrix[v][u] = true;
 }
 
@@ -27,14 +27,14 @@ int Graph::num_of_edges() const {
     return edges.size();
 }
 
-int Graph::get_neighbour(int v, int edge_id) const {
-    return edges[edge_id].first == v ? edges[edge_id].second : edges[edge_id].first;
+int Graph::get_neighbour(int v, int e) const {
+    return edges[e].first == v ? edges[e].second : edges[e].first;
 }
 
 vector<int> Graph::get_neighbours(int v) const {
     vector<int> neighbours;
-    for(int edge_id : adj_list[v]) {
-        neighbours.push_back(get_neighbour(v, edge_id));
+    for(int e : adj_list[v]) {
+        neighbours.push_back(get_neighbour(v, e));
     }
     return neighbours;
 }
@@ -49,12 +49,11 @@ vector<int> Graph::get_cycle() const {
                 return cycle;
             }
         }
-        cycle.clear();
     }
 }
 
-vector<int> Graph::get_edge_ends(int edge_id) const {
-    return {edges[edge_id].first, edges[edge_id].second};
+vector<int> Graph::get_edge_ends(int e) const {
+    return {edges[e].first, edges[e].second};
 }
 
 vector<Graph> Graph::get_biconnected_components() const {
@@ -102,52 +101,52 @@ void Graph::biconnected_components_dfs(int u, vector<int> &parent, vector<bool> 
     depth[u] = count;
     low[u] = depth[u];
 
-    for(int edge : adj_list[u]) {
-        int v = get_neighbour(u, edge);
+    for(int e : adj_list[u]) {
+        int v = get_neighbour(u, e);
         if(!visited[v]) {
-            edges_stack.push(edge);
+            edges_stack.push(e);
             parent[v] = u;
             biconnected_components_dfs(v, parent, visited, edges_stack, count, depth, low, components, compress);
 
             if(low[v] >= depth[u]) {
                 vector<int> component_edges;
-                int e;
+                int edge;
                 do {
-                    e = edges_stack.top();
-                    component_edges.push_back(e);
+                    edge = edges_stack.top();
+                    component_edges.push_back(edge);
                     edges_stack.pop();
-                } while(e != edge);
+                } while(edge != e);
 
                 Graph C = get_compressed_graph(component_edges, compress);
                 components.push_back(C);
             }
             low[u] = min(low[u], low[v]);
         } else if(parent[u] != v && depth[v] < depth[u]){
-            edges_stack.push(edge);
+            edges_stack.push(e);
             low[u] = min(low[u], depth[v]);
         }
     }
 }
 
 Graph Graph::get_compressed_graph(vector<int> &component_edges, vector<int> &compress) const {
-    int cnt = 0;
-    for(int edge_id : component_edges) {
-        for(int v : get_edge_ends(edge_id)) {
+    int id = 0;
+    for(int e : component_edges) {
+        for(int v : get_edge_ends(e)) {
             if (compress[v] == -1) {
-                compress[v] = cnt;
-                cnt++;
+                compress[v] = id;
+                id++;
             }
         }
     }
 
-    Graph C(cnt);
-    for(int edge_id : component_edges) {
-        C.add_edge(compress[edges[edge_id].first], compress[edges[edge_id].second]);
+    Graph C(id);
+    for(int e : component_edges) {
+        C.add_edge(compress[edges[e].first], compress[edges[e].second]);
     }
 
-    for(int edge_id : component_edges) {
-        for(int edge_end : get_edge_ends(edge_id)) {
-            compress[edge_end] = -1;
+    for(int e : component_edges) {
+        for(int v : get_edge_ends(e)) {
+            compress[v] = -1;
         }
     }
 

@@ -11,7 +11,7 @@ public:
     vector<vector<int>> faces;
     vector<vector<bool>> embedded;
     vector<vector<int>> vertex_faces;
-    vector<vector<bool>> face_belonging;
+    vector<vector<bool>> vertex_on_face;
 
     Embedding();
 
@@ -19,7 +19,7 @@ public:
 
     void embed_initial_cycle(vector<int> &cycle);
 
-    void embed_path(vector<int> path, int face_id);
+    void embed_path(vector<int> path, int face);
 
     bool is_vertex_embedded(int v);
 
@@ -27,10 +27,10 @@ public:
 
     void triangulate();
 
-    bool belongs(int v, int face_id);
+    bool belongs(int v, int face);
 
 private:
-    vector<int> get_face_fragment(int face_id, int a, int b);
+    vector<int> get_face_fragment(int face, int a, int b);
 };
 
 

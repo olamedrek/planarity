@@ -5,9 +5,10 @@
 Embedding::Embedding() {}
 
 Embedding::Embedding(Graph G) : G(G) {
-    embedded.resize(G.n, vector<bool>(G.n));
-    vertex_faces.resize(G.n);
-    face_belonging.resize(G.n, vector<bool>(4 * G.n)); // TODO faces upperbound
+    int n = G.n;
+    embedded.resize(n, vector<bool>(n));
+    vertex_faces.resize(n);
+    vertex_on_face.resize(n, vector<bool>(G.num_of_edges() - n + 2));
 }
 
 void Embedding::embed_initial_cycle(vector<int> &cycle) {
@@ -16,7 +17,7 @@ void Embedding::embed_initial_cycle(vector<int> &cycle) {
     for(int i = 0; i < (int)cycle.size()-1; i++) {
         int u = cycle[i], v = cycle[i+1];
         embedded[u][v] = embedded[v][u] = true;
-        face_belonging[u][0] = face_belonging[u][1] = true;
+        vertex_on_face[u][0] = vertex_on_face[u][1] = true;
         faces[0].push_back(u);
         faces[1].push_back(u);
         vertex_faces[u].push_back(0);
@@ -24,45 +25,45 @@ void Embedding::embed_initial_cycle(vector<int> &cycle) {
     }
 }
 
-void Embedding::embed_path(vector<int> path, int face_id) {
+void Embedding::embed_path(vector<int> path, int face) {
     int a = path[0], b = path.back();
-    vector<int> a_to_b = get_face_fragment(face_id, a, b);
-    vector<int> b_to_a = get_face_fragment(face_id, b, a);
+    vector<int> a_to_b = get_face_fragment(face, a, b);
+    vector<int> b_to_a = get_face_fragment(face, b, a);
 
     for(int i = 0; i < path.size()-1; i++) {
         int u = path[i], v = path[i+1];
         embedded[u][v] = embedded[v][u] = 1;
     }
 
-    int new_face_id = faces.size();
+    int new_face = faces.size();
     faces.push_back(vector<int>());
-    faces[face_id].clear();
+    faces[face].clear();
 
-    copy(b_to_a.begin(), b_to_a.end(), back_inserter(faces[new_face_id]));
-    copy(path.begin(), path.end(), back_inserter(faces[new_face_id]));
+    copy(b_to_a.begin(), b_to_a.end(), back_inserter(faces[new_face]));
+    copy(path.begin(), path.end(), back_inserter(faces[new_face]));
     reverse(path.begin(), path.end());
-    copy(a_to_b.begin(), a_to_b.end(), back_inserter(faces[face_id]));
-    copy(path.begin(), path.end(), back_inserter(faces[face_id]));
+    copy(a_to_b.begin(), a_to_b.end(), back_inserter(faces[face]));
+    copy(path.begin(), path.end(), back_inserter(faces[face]));
 
-    for(int v : b_to_a) { // TODO check complexity
+    for(int v : b_to_a) {
         for(int i = 0; i < vertex_faces[v].size(); i++) {
-            if(vertex_faces[v][i] == face_id) {
+            if(vertex_faces[v][i] == face) {
                 swap(vertex_faces[v][i], vertex_faces[v].back());
                 vertex_faces[v].pop_back();
                 break;
             }
         }
-        face_belonging[v][face_id] = false;
-        face_belonging[v][new_face_id] = true;
-        vertex_faces[v].push_back(new_face_id);
+        vertex_on_face[v][face] = false;
+        vertex_on_face[v][new_face] = true;
+        vertex_faces[v].push_back(new_face);
     }
 
     for(int v : path) {
-        vertex_faces[v].push_back(new_face_id);
-        face_belonging[v][new_face_id] = true;
+        vertex_faces[v].push_back(new_face);
+        vertex_on_face[v][new_face] = true;
         if(v != a && v != b) {
-            vertex_faces[v].push_back(face_id);
-            face_belonging[v][face_id] = true;
+            vertex_faces[v].push_back(face);
+            vertex_on_face[v][face] = true;
         }
     }
 }
@@ -76,20 +77,20 @@ bool Embedding::is_edge_embedded(int e) {
 }
 
 void Embedding::triangulate() {
-    int face_id = 0;
+    int face = 0;
 
-    while(face_id < faces.size()) {
-        if(faces[face_id].size() > 3) {
+    while(face < faces.size()) {
+        if(faces[face].size() > 3) {
 
             bool done = false;
-            for(int i = 0; i < faces[face_id].size(); i++) {
-                for(int j = i+1; j < faces[face_id].size(); j++) {
-                    int v = faces[face_id][i];
-                    int u = faces[face_id][j];
+            for(int i = 0; i < faces[face].size(); i++) {
+                for(int j = i+1; j < faces[face].size(); j++) {
+                    int v = faces[face][i];
+                    int u = faces[face][j];
 
                     if(!G.matrix[v][u]) {
                         G.add_edge(v, u);
-                        embed_path(vector<int>({v, u}), face_id);
+                        embed_path(vector<int>({v, u}), face);
                         done = true;
                         break;
                     }
@@ -97,31 +98,31 @@ void Embedding::triangulate() {
                 if(done) break;
             }
         } else {
-            face_id++;
+            face++;
         }
     }
 }
 
-bool Embedding::belongs(int v, int face_id) {
-    return face_belonging[v][face_id];
+bool Embedding::belongs(int v, int face) {
+    return vertex_on_face[v][face];
 }
 
-vector<int> Embedding::get_face_fragment(int face_id, int a, int b) {
+vector<int> Embedding::get_face_fragment(int face, int a, int b) {
     vector<int> result;
     int a_pos, b_pos;
-    int size = faces[face_id].size();
+    int size = faces[face].size();
 
     for(int i = 0; i < size; i++) {
-        if(faces[face_id][i] == a) {
+        if(faces[face][i] == a) {
             a_pos = i;
         }
-        if(faces[face_id][i] == b) {
+        if(faces[face][i] == b) {
             b_pos = i;
         }
     }
 
     for(int i = (a_pos + 1) % size; i != b_pos; i = (i+1) % size) {
-        result.push_back(faces[face_id][i]);
+        result.push_back(faces[face][i]);
     }
     return result;
 }

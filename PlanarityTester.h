@@ -8,7 +8,6 @@
 
 class PlanarityTester {
 public:
-    int n, m;
     const Graph &G;
     Embedding embedding;
 

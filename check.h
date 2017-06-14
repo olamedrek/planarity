@@ -14,7 +14,7 @@ class Segment {
 private:
     Point p1, p2;
     double A, B, C;
-    const double EPS = 0.0000001;
+    static constexpr double EPS = 0.0000001;
 
 public:
     Segment(Point p1, Point p2) : p1(p1), p2(p2) {
@@ -37,7 +37,14 @@ public:
                p.x >= min(p1.x, p2.x) && p.x <= max(p1.x, p2.x);
     }
 
+    friend bool colinear(Segment s1, Segment s2) {
+        return abs(s1.A - s2.A) < EPS && abs(s1.B - s2.B) < EPS && abs(s1.C - s2.C) < EPS;
+    }
+
     friend Point get_intersection(Segment s1, Segment s2) {
+        if(colinear(s1, s2)) {
+            return s1.p1;
+        }
         double y = (s2.A * s1.C - s1.A * s2.C) / (s1.A * s2.B - s1.B * s2.A);
         double x = (-1 * s1.C - s1.B * y) / s1.A;
         return Point(x, y);

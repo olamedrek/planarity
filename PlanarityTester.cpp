@@ -1,16 +1,13 @@
 
 #include "PlanarityTester.h"
 
-PlanarityTester::PlanarityTester(const Graph &G) : G(G), embedding(G) {
-    n = G.n;
-    m = G.num_of_edges();
-}
+PlanarityTester::PlanarityTester(const Graph &G) : G(G), embedding(G) {}
 
 pair<bool,Embedding> PlanarityTester::test() {
-    if(G.edges.size() <= 1) {
+    if(G.num_of_edges() <= 1) {
         return {true, Embedding()};
     }
-    if(G.edges.size() > 3 * n - 6) {
+    if(G.num_of_edges() > 3 * G.n - 6) {
         return {false, Embedding()};
     }
 
@@ -34,19 +31,19 @@ pair<bool,Embedding> PlanarityTester::test() {
         }
         if(chosen_fragment == -1) chosen_fragment = 0;
 
-        Graph fragment(n);
-        for(int edge_id : fragments[chosen_fragment]) {
-            fragment.add_edge(G.edges[edge_id]);
+        Graph fragment(G.n);
+        for(int e : fragments[chosen_fragment]) {
+            fragment.add_edge(G.edges[e]);
         }
 
-        vector<bool> contact(n);
+        vector<bool> contact(G.n);
         for(int v : contact_vertices[chosen_fragment]) {
             contact[v] = true;
         }
 
         vector<int> alpha_path = get_alpha_path(fragment, contact);
-        int face_id = admissible_faces[chosen_fragment][0];
-        embedding.embed_path(alpha_path, face_id);
+        int face = admissible_faces[chosen_fragment][0];
+        embedding.embed_path(alpha_path, face);
     }
     return {true, embedding};
 }
@@ -68,9 +65,9 @@ void PlanarityTester::fragments_dfs(int e, int v, vector<bool> &visited, vector<
 
 vector<vector<int>> PlanarityTester::get_fragments() {
     vector<vector<int>> fragments;
-    vector<bool> visited(m);
+    vector<bool> visited(G.num_of_edges());
 
-    for(int i = 0; i < m; i++) {
+    for(int i = 0; i < G.num_of_edges(); i++) {
         int u = G.edges[i].first;
         int v = G.edges[i].second;
         bool u_embedded = embedding.is_vertex_embedded(u);
@@ -87,18 +84,18 @@ vector<vector<int>> PlanarityTester::get_fragments() {
 
 vector<vector<int>> PlanarityTester::get_contact_vertices(vector<vector<int>> &fragments) {
     vector<vector<int>> contact_vertices(fragments.size());
-    vector<bool> seen(n, 0);
+    vector<bool> seen(G.n, 0);
 
     for(int i = 0; i < fragments.size(); i++) {
-        for(int edge : fragments[i]) {
-            for(int v : G.get_edge_ends(edge)) {
+        for(int e : fragments[i]) {
+            for(int v : G.get_edge_ends(e)) {
                 if(embedding.is_vertex_embedded(v)) {
                     seen[v] = true;
                 }
             }
         }
-        for(int edge : fragments[i]) {
-            for(int v : G.get_edge_ends(edge)) {
+        for(int e : fragments[i]) {
+            for(int v : G.get_edge_ends(e)) {
                 if(seen[v]) {
                     contact_vertices[i].push_back(v);
                 }
@@ -113,8 +110,6 @@ vector<vector<int>> PlanarityTester::get_admissible_faces(vector<vector<int>> &f
                                                           vector<vector<int>> &contact_vertices) {
     vector<vector<int>> admissible_faces(fragments.size());
 
-    // TODO zapisywac przeciecia
-
     for(int i = 0; i < fragments.size(); i++) {
         int min_faces_num = embedding.faces.size();
         int min_vertex = contact_vertices[i][0];
@@ -127,14 +122,14 @@ vector<vector<int>> PlanarityTester::get_admissible_faces(vector<vector<int>> &f
         }
         vector<int> candidates = embedding.vertex_faces[min_vertex];
 
-        for(int face_id : candidates) {
-            bool contain_all = true;
+        for(int face : candidates) {
+            bool contains_all = true;
             for(int v : contact_vertices[i]) {
-                if(!embedding.belongs(v, face_id)) {
-                    contain_all = false;
+                if(!embedding.belongs(v, face)) {
+                    contains_all = false;
                 }
             }
-            if(contain_all) admissible_faces[i].push_back(face_id);
+            if(contains_all) admissible_faces[i].push_back(face);
         }
     }
     return admissible_faces;
@@ -163,7 +158,7 @@ bool PlanarityTester::alpha_path_dfs(int v, Graph &fragment, vector<bool> &visit
 
 vector<int> PlanarityTester::get_alpha_path(Graph &fragment, vector<bool> &contact) {
     vector<int> path;
-    vector<bool> visited(n);
+    vector<bool> visited(G.n);
 
     for(int i = 0; i < contact.size(); i++) {
         if(contact[i]) {

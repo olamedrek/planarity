@@ -24,7 +24,7 @@ input_path = args.path
 
 output_path = input_path[:-2] + "out"
 expected_path = input_path[:-2] + "exp"
-testname = re.search('test[0-9]', input_path).group(0)
+testname = re.search('test[0-9]+', input_path).group(0)
 
 subprocess.call([os.getcwd() + '/' + executable, input_path, output_path])
 

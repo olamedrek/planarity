@@ -23,13 +23,13 @@ public:
 
     int num_of_edges() const;
 
-    int get_neighbour(int v, int edge_id) const;
+    int get_neighbour(int v, int e) const;
 
     vector<int> get_neighbours(int v) const;
 
     vector<int> get_cycle() const;
 
-    vector<int> get_edge_ends(int edge_id) const;
+    vector<int> get_edge_ends(int e) const;
 
     vector<Graph> get_biconnected_components() const;
 
