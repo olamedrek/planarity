@@ -1,8 +1,8 @@
 
 #include <iostream>
 #include "Graph.h"
-#include "GeometricEmbeddingCreator.h"
-#include "check.h"
+#include "CoordinatesBuilder.h"
+#include "check_drawing.h"
 
 using namespace std;
 
@@ -10,7 +10,7 @@ bool test_non_biconnected(vector<Graph> &components) {
     bool result;
     Embedding embedding;
     for(Graph &comp : components) {
-        PlanarityTester tester(comp);
+        PlanarityTest tester(comp);
         tie(result, embedding) = tester.test();
         if(!result) return false;
     }
@@ -18,12 +18,12 @@ bool test_non_biconnected(vector<Graph> &components) {
 }
 
 pair<bool,vector<pair<int,int>>> get_coordinates(Graph &G) {
-    PlanarityTester tester(G);
+    PlanarityTest tester(G);
     bool result;
     Embedding embedding;
     tie(result, embedding) = tester.test();
     if(result) {
-        GeometricEmbeddingCreator creator(embedding);
+        CoordinatesBuilder creator(embedding);
         return {result, creator.get_coordinates()};
     } else {
         return {result, vector<pair<int,int>>()};
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
     vector<Graph> components = G.get_biconnected_components();
 
-    if(components.size() == 1 && G.num_of_edges() > 1) {
+    if(components.size() == 1) {
         cout << 1 << endl;
 
         bool planar;
@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
         }
     } else {
         cout << 0 << endl;
+
         bool planar = test_non_biconnected(components);
         cout << planar << endl;
     }

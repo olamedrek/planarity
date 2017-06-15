@@ -1,15 +1,20 @@
 
-#include "GeometricEmbeddingCreator.h"
+#include "CoordinatesBuilder.h"
 
-GeometricEmbeddingCreator::GeometricEmbeddingCreator(Embedding embedding) : embedding(embedding) {}
+CoordinatesBuilder::CoordinatesBuilder(Embedding embedding) : embedding(embedding) {}
 
 pair<int,int> intersection(pair<int,int> &a, pair<int,int> &b) {
     return {(a.first - a.second + b.first + b.second) / 2, (-a.first + a.second + b.first + b.second) / 2};
 };
 
-vector<pair<int,int>> GeometricEmbeddingCreator::get_coordinates() {
-    embedding.triangulate();
+vector<pair<int,int>> CoordinatesBuilder::get_coordinates() {
     Graph& G = embedding.G;
+
+    if(G.n == 1 && G.num_of_edges() == 0) {
+        return {make_pair(0,0)};
+    }
+
+    embedding.triangulate();
 
     vector<int> order = get_canonical_order();
 
@@ -70,7 +75,7 @@ vector<pair<int,int>> GeometricEmbeddingCreator::get_coordinates() {
     return coordinates;
 };
 
-vector<int> GeometricEmbeddingCreator::get_canonical_order() {
+vector<int> CoordinatesBuilder::get_canonical_order() {
     Graph& G = embedding.G;
     vector<vector<int>>& faces = embedding.faces;
     int n = embedding.G.n;

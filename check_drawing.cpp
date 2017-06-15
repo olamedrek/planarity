@@ -1,5 +1,6 @@
 
 #include "Graph.h"
+#include "check_drawing.h"
 
 class Point {
 public:

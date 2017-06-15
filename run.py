@@ -12,26 +12,26 @@ import argparse
 font = {'size' : 14}
 matplotlib.rc('font', **font)
 
-executable = "cmake-build-debug/planarity"
-
-parser = argparse.ArgumentParser(description='Process some integers.')
+parser = argparse.ArgumentParser()
 parser.add_argument('-draw', action='store_true', required=False, default=False)
-parser.add_argument('-path', action='store', required=True)
+parser.add_argument('-input', action='store', required=True)
+parser.add_argument('-exe', action='store', required=True)
 args = parser.parse_args()
 
 flag_draw = args.draw
-input_path = args.path
+in_path = args.input
+exe_path = args.exe
 
-output_path = input_path[:-2] + "out"
-expected_path = input_path[:-2] + "exp"
-testname = re.search('test[0-9]+', input_path).group(0)
+out_path = in_path[:-2] + "out"
+exp_path = in_path[:-2] + "exp"
+testname = re.search('test[0-9]+', in_path).group(0)
 
-subprocess.call([os.getcwd() + '/' + executable, input_path, output_path])
+subprocess.call([exe_path, in_path, out_path])
 
 points = []
 edges = []
 
-with open(output_path) as output:
+with open(out_path) as output:
     biconnected = int(next(output)) == 1
     planar = int(next(output)) == 1
 
@@ -42,15 +42,15 @@ with open(output_path) as output:
             x, y = [int(i) for i in line.split()]
             points.append([x, y])
 
-expected_present = os.path.isfile(expected_path)
+exp_present = os.path.isfile(exp_path)
 
-if expected_present:
-    with open(expected_path) as expected:
-        expected_biconnected = int(next(expected)) == 1
-        expected_planar = int(next(expected)) == 1
+if exp_present:
+    with open(exp_path) as expected:
+        exp_biconnected = int(next(expected)) == 1
+        exp_planar = int(next(expected)) == 1
 
     result = True
-    if expected_planar != planar or expected_biconnected != biconnected:
+    if exp_planar != planar or exp_biconnected != biconnected:
         result = False
 
 
@@ -65,7 +65,7 @@ if flag_draw == False:
     else:
         print "NA",
 
-    if expected_present:
+    if exp_present:
         if result:
             print "OK"
         else:
@@ -76,17 +76,17 @@ if flag_draw == False:
     sys.exit()
 
 
-print "biconnected", biconnected
-print "planar", planar
+print "Biconnected:", biconnected
+print "Planar:", planar
 if planar and biconnected:
-    print "drawing correct", drawing_correct
-if expected_present:
-    print "result", result
+    print "Drawing correct:", drawing_correct
+if exp_present:
+    print "Result correct:", result
 else:
-    print "result Unknown"
+    print "Result unknown"
 
 if biconnected and planar:
-    with open(input_path) as input:
+    with open(in_path) as input:
         n, m = [int(i) for i in next(input).split()]
         cnt = 0
         for line in input:
@@ -103,10 +103,9 @@ if biconnected and planar:
     y = points[:,1].flatten()
 
     for i in range(n):
-        plt.annotate(i+1, (x[i] + 0.1, y[i] + 0.1))
+        plt.annotate(i+1, (x[i], y[i]))
 
-    plt.plot(x[edges.T], y[edges.T], linestyle='-', color='lightgray', markerfacecolor='black', marker='o')
+    if len(edges) > 0:
+        plt.plot(x[edges.T], y[edges.T], linestyle='-', color='lightgray', markerfacecolor='black', marker='o')
     plt.axis('off')
     plt.show()
-
-

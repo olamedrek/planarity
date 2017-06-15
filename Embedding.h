@@ -17,6 +17,8 @@ public:
 
     Embedding(Graph G);
 
+    void embed_tree();
+
     void embed_initial_cycle(vector<int> &cycle);
 
     void embed_path(vector<int> path, int face);

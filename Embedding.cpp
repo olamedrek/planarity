@@ -11,6 +11,19 @@ Embedding::Embedding(Graph G) : G(G) {
     vertex_on_face.resize(n, vector<bool>(G.num_of_edges() - n + 2));
 }
 
+void Embedding::embed_tree() {
+    faces.resize(1);
+
+    for(int i = 0; i < G.n; i++) {
+        vertex_on_face[i][0] = true;
+        faces[0].push_back(i);
+        vertex_faces[i].push_back(0);
+    }
+    for(pair<int,int> p : G.edges) {
+        embedded[p.first][p.second] = embedded[p.second][p.first] = true;
+    }
+}
+
 void Embedding::embed_initial_cycle(vector<int> &cycle) {
     faces.resize(2);
 

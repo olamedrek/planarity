@@ -64,7 +64,11 @@ vector<Graph> Graph::get_biconnected_components() const {
 
     for(int i = 0; i < n; i++) {
         if(!visited[i]) {
-            biconnected_components_dfs(i, parent, visited, edges_stack, 0, depth, low, components, compress);
+            if(adj_list[i].size() > 0) {
+                biconnected_components_dfs(i, parent, visited, edges_stack, 0, depth, low, components, compress);
+            } else {
+                components.push_back(Graph(1));
+            }
         }
     }
     return components;
