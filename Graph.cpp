@@ -19,10 +19,6 @@ void Graph::add_edge(int u, int v) {
     matrix[u][v] = matrix[v][u] = true;
 }
 
-void Graph::add_edge(pair<int,int> p) {
-    add_edge(p.first, p.second);
-}
-
 int Graph::num_of_edges() const {
     return edges.size();
 }

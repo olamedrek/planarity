@@ -35,7 +35,7 @@ pair<bool,Embedding> PlanarityTest::test() {
 
         Graph fragment(G.n);
         for(int e : fragments[chosen_fragment]) {
-            fragment.add_edge(G.edges[e]);
+            fragment.add_edge(G.edges[e].first, G.edges[e].second);
         }
 
         vector<bool> contact(G.n);

@@ -19,8 +19,6 @@ public:
 
     void add_edge(int u, int v);
 
-    void add_edge(pair<int,int> p);
-
     int num_of_edges() const;
 
     int get_neighbour(int v, int e) const;
