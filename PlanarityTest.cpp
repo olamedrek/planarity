@@ -23,7 +23,7 @@ pair<bool,Embedding> PlanarityTest::test() {
         vector<vector<int>> contact_vertices = get_contact_vertices(fragments);
         vector<vector<int>> admissible_faces = get_admissible_faces(fragments, contact_vertices);
 
-        int chosen_fragment = -1;
+        int chosen_fragment = 0;
         for(int i = 0; i < fragments.size(); i++) {
             if(admissible_faces[i].size() == 0) {
                 return {false, Embedding()};
@@ -31,7 +31,6 @@ pair<bool,Embedding> PlanarityTest::test() {
                 chosen_fragment = i;
             }
         }
-        if(chosen_fragment == -1) chosen_fragment = 0;
 
         Graph fragment(G.n);
         for(int e : fragments[chosen_fragment]) {
@@ -129,6 +128,7 @@ vector<vector<int>> PlanarityTest::get_admissible_faces(vector<vector<int>> &fra
             for(int v : contact_vertices[i]) {
                 if(!embedding.belongs(v, face)) {
                     contains_all = false;
+                    break;
                 }
             }
             if(contains_all) admissible_faces[i].push_back(face);

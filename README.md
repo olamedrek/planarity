@@ -19,7 +19,7 @@ The next m lines describe the edges of the graph: each of them should contain tw
 
 ### Output
 
-The first line of the output contains information about biconnectivity of the graph, the second line contains informatio about its planarity. If the flag -draw is set, the image of a graph is displayed.
+The first line of the output contains information about biconnectivity of the graph, the second line contains information about its planarity. If the flag -draw is set, the image of a graph is displayed (only for biconnected).
 
 ## Running the tests
 

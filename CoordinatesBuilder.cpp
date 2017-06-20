@@ -13,6 +13,9 @@ vector<pair<int,int>> CoordinatesBuilder::get_coordinates() {
     if(G.n == 1 && G.num_of_edges() == 0) {
         return {make_pair(0,0)};
     }
+    if(G.n == 2 && G.num_of_edges() == 1) {
+        return {make_pair(0,0), make_pair(1,0)};
+    }
 
     embedding.triangulate();
 

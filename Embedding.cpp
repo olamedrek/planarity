@@ -122,17 +122,11 @@ bool Embedding::belongs(int v, int face) {
 
 vector<int> Embedding::get_face_fragment(int face, int a, int b) {
     vector<int> result;
-    int a_pos, b_pos;
-    int size = faces[face].size();
 
-    for(int i = 0; i < size; i++) {
-        if(faces[face][i] == a) {
-            a_pos = i;
-        }
-        if(faces[face][i] == b) {
-            b_pos = i;
-        }
-    }
+    int a_pos = find(faces[face].begin(), faces[face].end(), a) - faces[face].begin();
+    int b_pos = find(faces[face].begin(), faces[face].end(), b) - faces[face].begin();
+
+    int size = faces[face].size();
 
     for(int i = (a_pos + 1) % size; i != b_pos; i = (i+1) % size) {
         result.push_back(faces[face][i]);
